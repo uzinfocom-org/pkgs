@@ -1,0 +1,50 @@
+name: Test CI
+
+on: [push, pull_request]
+
+jobs:
+  test-flake:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, self-hosted, macos-latest, macos-13]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        if: ${{ matrix.os != 'self-hosted' }}
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Cache Nix store
+        if: ${{ matrix.os != 'self-hosted' }}
+        uses: DeterminateSystems/flakehub-cache-action@main
+
+      - name: Check up flake configuration
+        run: nix flake check --show-trace
+
+  build-packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, self-hosted, macos-latest, macos-13]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        if: ${{ matrix.os != 'self-hosted' }}
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Cache Nix store
+        if: ${{ matrix.os != 'self-hosted' }}
+        uses: DeterminateSystems/flakehub-cache-action@main
+
+      - name: Build all packages
+        run: nix flake show --json | jq  '.packages."x86_64-linux"|keys[]'| xargs -I {} nix build .#{}

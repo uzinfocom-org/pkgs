@@ -1,0 +1,5 @@
+# Nix build path
+/result
+
+# Direnv
+.direnv
