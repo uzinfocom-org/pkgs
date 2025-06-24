@@ -9,6 +9,12 @@
   # inputs are other flakes you use within your own flake, dependencies
   # for your flake, etc.
   inputs = {
+    #    ______
+    #   / ____/___  ________
+    #  / /   / __ \/ ___/ _ \
+    # / /___/ /_/ / /  /  __/
+    # \____/\____/_/   \___/
+
     # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
@@ -19,6 +25,16 @@
 
     # Flake utils for eachSystem
     flake-utils.url = "github:numtide/flake-utils";
+
+    #     ____                            __                _
+    #    / __ \___  ____  ___  ____  ____/ /__  ____  _____(_)__  _____
+    #   / / / / _ \/ __ \/ _ \/ __ \/ __  / _ \/ __ \/ ___/ / _ \/ ___/
+    #  / /_/ /  __/ /_/ /  __/ / / / /_/ /  __/ / / / /__/ /  __(__  )
+    # /_____/\___/ .___/\___/_/ /_/\__,_/\___/_/ /_/\___/_/\___/____/
+    #           /_/
+
+    # Main homepage website
+    gate.url = "github:kolyma-labs/gate";
   };
 
   outputs = {
