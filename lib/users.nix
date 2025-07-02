@@ -11,8 +11,20 @@
     github_keys_url ? "",
     sha256 ? "",
     home_nix_path,
-  }: {
-    users.users = {
+  }: let 
+    openssh = lib.mkIf(github_keys_url && sha256) lib.mkOption {
+      lib.strings.splitString "\n" (
+        builtins.readFile (
+          builtins.fetchurl {
+            url = "${github_keys_url}";
+            sha256 = "${sha256}";
+          }
+        )
+      )
+    };
+    
+  in{
+    users.users = lib.mkIf(description && username) {
       "${username}" = {
         inherit hashedPassword;
         isNormalUser = true;
@@ -24,14 +36,8 @@
           "docker"
           "admins"
         ];
-        openssh.authorizedKeys.keys = lib.strings.splitString "\n" (
-          builtins.readFile (
-            builtins.fetchurl {
-              url = "${github_keys_url}";
-              sha256 = "${sha256}";
-            }
-          )
-        );
+        
+        openssh.authorizedKeys.keys = openssh;
       };
     };
 
