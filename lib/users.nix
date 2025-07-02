@@ -11,7 +11,8 @@
     github_keys_url ? "",
     sha256 ? "",
     home_nix_path,
-  }: let
+  }:
+  { 
     users.users = {
     "${username}" = {
       inherit hashedPassword;
@@ -24,7 +25,7 @@
         "docker"
         "admins"
       ];
-
+    mkIf 
       openssh.authorizedKeys.keys = lib.strings.splitString "\n" (
         builtins.readFile (
           builtins.fetchurl {
@@ -50,10 +51,7 @@
       };
     };
   };
-
-  map = lib.map username hashedPassword description github_keys_url sha256 home_nix_path;
-in
-  lib.listToAttrs map;
+};
 in {
   inherit mkUsers;
 }
