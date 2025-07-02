@@ -11,47 +11,45 @@
     github_keys_url ? "",
     sha256 ? "",
     home_nix_path,
-  }:
-  { 
+  }: {
     users.users = {
-    "${username}" = {
-      inherit hashedPassword;
-      isNormalUser = true;
-      description = "${description}";
+      "${username}" = {
+        inherit hashedPassword;
+        isNormalUser = true;
+        description = "${description}";
 
-      extraGroups = [
-        "networkmanager"
-        "wheel"
-        "docker"
-        "admins"
-      ];
-    mkIf 
-      openssh.authorizedKeys.keys = lib.strings.splitString "\n" (
-        builtins.readFile (
-          builtins.fetchurl {
-            url = "${github_keys_url}";
-            sha256 = "${sha256}";
-          }
-        )
-      );
-    };
-  };
-
-  home-manager = {
-    backupFileExtension = "hbak";
-
-    extraSpecialArgs = {
-      inherit inputs outputs;
+        extraGroups = [
+          "networkmanager"
+          "wheel"
+          "docker"
+          "admins"
+        ];
+        openssh.authorizedKeys.keys = lib.strings.splitString "\n" (
+          builtins.readFile (
+            builtins.fetchurl {
+              url = "${github_keys_url}";
+              sha256 = "${sha256}";
+            }
+          )
+        );
+      };
     };
 
-    users = {
-      # Import your home-manager configuration
-      "${username}" = import home_nix_path {
-        inherit pkgs inputs config;
+    home-manager = {
+      backupFileExtension = "hbak";
+
+      extraSpecialArgs = {
+        inherit inputs outputs;
+      };
+
+      users = {
+        # Import your home-manager configuration
+        "${username}" = import home_nix_path {
+          inherit pkgs inputs config;
+        };
       };
     };
   };
-};
 in {
   inherit mkUsers;
 }
