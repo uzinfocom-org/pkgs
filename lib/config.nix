@@ -147,6 +147,57 @@
     inputs,
     outputs,
   }:
+  # let
+  #   users.users = lib.mkIf (description && username) {
+  #     "${username}" = {
+  #       inherit hashedPassword;
+  #       isNormalUser = true;
+  #       description = "${description}";
+  #       extraGroups = [
+  #         "networkmanager"
+  #         "wheel"
+  #         "docker"
+  #         "admins"
+  #       ];
+  #       openssh.authorizedKeys.keys = lib.mkIf (githubKeysUrl && sha256)
+  #     lib.strings.splitString
+  #     "\n"
+  #     (
+  #       builtins.readFile (
+  #         builtins.fetchurl {
+  #           url = "${githubKeysUrl}";
+  #           sha256 = "${sha256}";
+  #         }
+  #       )
+  #     );
+  #     };
+  #   };
+  #   home-manager = {
+  #     backupFileExtension = "hbak";
+  #     extraSpecialArgs = {
+  #       inherit inputs outputs;
+  #     };
+  #     users = {
+  #       # Import your home-manager configuration
+  #       "${username}" = import homePath {
+  #         inherit pkgs inputs config;
+  #       };
+  #     };
+  #   };
+  # in
+  # mkUsers = {
+  #   inputs,
+  #   outputs,
+  #   config,
+  #   pkgs,
+  #   # user properties
+  #   username,
+  #   hashedPassword,
+  #   description,
+  #   githubKeysUrl ? "",
+  #   sha256 ? "",
+  #   homePath,
+  # }:
     inputs.home-manager.lib.homeManagerConfiguration {
       pkgs = repo.legacyPackages."${arch}"; # Home-manager requires 'pkgs' instance
       extraSpecialArgs = {
@@ -158,5 +209,5 @@
       ];
     };
 in {
-  inherit attrSystem mapSystem makeSystem mapHome attrHome makeHome;
+  inherit attrSystem mapSystem makeSystem mapHome attrHome makeHome mkUsers;
 }

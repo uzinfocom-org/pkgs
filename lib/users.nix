@@ -1,4 +1,4 @@
-{lib}: {
+{lib}: let
   mkUsers = {
     inputs,
     outputs,
@@ -57,4 +57,4 @@
       };
     };
   };
-}
+in {inherit mkUsers;}
