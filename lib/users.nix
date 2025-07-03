@@ -1,4 +1,4 @@
-{lib}: let
+{lib}: {
   mkUsers = {
     inputs,
     outputs,
@@ -11,20 +11,21 @@
     github_keys_url ? "",
     sha256 ? "",
     home_nix_path,
-  }: let 
-    openssh = lib.mkIf(github_keys_url && sha256) lib.mkOption {
-      lib.strings.splitString "\n" (
+  }: let
+    openssh =
+      lib.mkIf (github_keys_url && sha256)
+      lib.strings.splitString
+      "\n"
+      (
         builtins.readFile (
           builtins.fetchurl {
             url = "${github_keys_url}";
             sha256 = "${sha256}";
           }
         )
-      )
-    };
-    
-  in{
-    users.users = lib.mkIf(description && username) {
+      );
+  in {
+    users.users = lib.mkIf (description && username) {
       "${username}" = {
         inherit hashedPassword;
         isNormalUser = true;
@@ -36,7 +37,7 @@
           "docker"
           "admins"
         ];
-        
+
         openssh.authorizedKeys.keys = openssh;
       };
     };
@@ -56,6 +57,4 @@
       };
     };
   };
-in {
-  inherit mkUsers;
 }
