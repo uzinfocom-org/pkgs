@@ -14,7 +14,7 @@
     homePath,
   }: let
     openssh =
-      lib.mkIf (githubKeysUrl && sha256)
+      lib.mkIf (githubKeysUrl != "" && sha256 != "")
       lib.strings.splitString
       "\n"
       (
@@ -26,7 +26,7 @@
         )
       );
   in {
-    users.users = lib.mkIf (description && username) {
+    users.users = lib.mkIf (description != "" && username != "") {
       "${username}" = {
         inherit hashedPassword;
         isNormalUser = true;
