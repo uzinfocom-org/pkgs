@@ -8,18 +8,18 @@
     username,
     hashedPassword,
     description,
-    github_keys_url ? "",
+    githubKeysUrl ? "",
     sha256 ? "",
-    home_nix_path,
+    homePath,
   }: let
     openssh =
-      lib.mkIf (github_keys_url && sha256)
+      lib.mkIf (githubKeysUrl && sha256)
       lib.strings.splitString
       "\n"
       (
         builtins.readFile (
           builtins.fetchurl {
-            url = "${github_keys_url}";
+            url = "${githubKeysUrl}";
             sha256 = "${sha256}";
           }
         )
@@ -51,7 +51,7 @@
 
       users = {
         # Import your home-manager configuration
-        "${username}" = import home_nix_path {
+        "${username}" = import homePath {
           inherit pkgs inputs config;
         };
       };
