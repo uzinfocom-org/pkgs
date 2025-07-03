@@ -4,6 +4,7 @@
     outputs,
     config,
     pkgs,
+    lib,
     # user properties
     username,
     hashedPassword,
