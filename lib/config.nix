@@ -209,5 +209,5 @@
       ];
     };
 in {
-  inherit attrSystem mapSystem makeSystem mapHome attrHome makeHome mkUsers;
+  inherit attrSystem mapSystem makeSystem mapHome attrHome makeHome;
 }
