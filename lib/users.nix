@@ -13,8 +13,7 @@
     sha256 ? "",
     homePath,
   }: let
-    openssh =
-      lib.mkIf (githubKeysUrl != "" && sha256 != "")
+    openssh = lib.mkIf (githubKeysUrl != "" && sha256 != "") (
       lib.strings.splitString
       "\n"
       (
@@ -24,7 +23,8 @@
             sha256 = "${sha256}";
           }
         )
-      );
+      )
+    );
   in {
     users.users = lib.mkIf (description != "" && username != "") {
       "${username}" = {
