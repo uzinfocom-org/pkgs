@@ -38,7 +38,7 @@
     homeUsers = builtins.listToAttrs (builtins.map (i: {
         # Import your home-manager configuration
         name = "${i.username}";
-        value = import ../templates/home upstream i.homeModules i.username;
+        value = import ./home.nix upstream i.homeModules i.username;
       })
       users);
   in {
