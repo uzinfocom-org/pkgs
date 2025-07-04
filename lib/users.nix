@@ -18,7 +18,7 @@
             "admins"
           ];
 
-          openssh.authorizedKeys.keys = lib.optionals ((i.githubKeysUrl != "") && (i.sha256 != "")) [
+          openssh.authorizedKeys.keys = lib.lists.optionals ((i.githubKeysUrl != "") && (i.sha256 != "")) [
             lib.strings.splitString
             "\n"
             (
