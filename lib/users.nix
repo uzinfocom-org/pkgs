@@ -18,18 +18,12 @@
             "admins"
           ];
 
-          openssh.authorizedKeys.keys = lib.optionals ((i.githubKeysUrl != "") && (i.sha256 != "")) [
-            lib.strings.splitString
-            "\n"
-            (
-              builtins.readFile (
-                builtins.fetchurl {
-                  url = "${i.githubKeysUrl}";
-                  sha256 = "${i.sha256}";
-                }
-              )
-            )
-          ];
+          openssh.authorizedKeys.keys =
+            lib.optionals # function
+            ((i.githubKeysUrl != "") && (i.sha256 != "")) # arg1
+            (lib.strings.splitString 
+            "\n" (builtins.readFile (builtins.fetchurl {url = "${i.githubKeysUrl}"; sha256 = "${i.sha256}";}))) # arg2
+          ;
         };
       })
       users);
