@@ -2,46 +2,53 @@
   mkUsers = {
     inputs,
     outputs,
+    lib,
     config,
     pkgs,
-    lib,
-    # user properties
-    username,
-    hashedPassword,
-    description,
-    githubKeysUrl ? "",
-    sha256 ? "",
-    homePath,
+    # home-manager users data
+    users,
   }: let
-    openssh = lib.mkIf ((githubKeysUrl != "") && (sha256 != "")) (
-      lib.strings.splitString
-      "\n"
-      (
-        builtins.readFile (
-          builtins.fetchurl {
-            url = "${githubKeysUrl}";
-            sha256 = "${sha256}";
-          }
-        )
-      )
-    );
+    nixosUsers = builtins.listToAttrs (builtins.map (i: {
+        name = i.username;
+        value = {
+          hashedPassword = "${i.hashedPassword}";
+          isNormalUser = true;
+          description = "${i.description}";
+
+          extraGroups = [
+            "networkmanager"
+            "wheel"
+            "docker"
+            "admins"
+          ];
+
+          openssh.authorizedKeys.keys = lib.mkIf ((i.githubKeysUrl != "") && (i.sha256 != "")) (
+            lib.strings.splitString
+            "\n"
+            (
+              builtins.readFile (
+                builtins.fetchurl {
+                  url = "${i.githubKeysUrl}";
+                  sha256 = "${i.sha256}";
+                }
+              )
+            )
+          );
+        };
+      })
+      users);
+
+    homeUsers = builtins.listToAttrs (builtins.map (i: {
+        # Import your home-manager configuration
+        name = "${i.username}";
+        value = import i.homePath {
+          inherit pkgs inputs config lib;
+        };
+      })
+      users);
   in {
-    users.users = {
-      "${username}" = {
-        inherit hashedPassword;
-        isNormalUser = true;
-        description = "${description}";
-
-        extraGroups = [
-          "networkmanager"
-          "wheel"
-          "docker"
-          "admins"
-        ];
-
-        openssh.authorizedKeys.keys = openssh;
-      };
-    };
+    # mapped users
+    users.users = nixosUsers;
 
     home-manager = {
       backupFileExtension = "hbak";
@@ -49,13 +56,8 @@
       extraSpecialArgs = {
         inherit inputs outputs;
       };
-
-      users = {
-        # Import your home-manager configuration
-        "${username}" = import homePath {
-          inherit pkgs inputs config;
-        };
-      };
+      # mapped home-manager
+      users = homeUsers;
     };
   };
 in {inherit mkUsers;}
