@@ -2,10 +2,9 @@
   mkUsers = users: upstream: let
     inputs = upstream.inputs;
     outputs = upstream.outputs;
-    config = upstream.config;
-    pkgs = upstream.pkgs;
-
-    nixosUsers = builtins.listToAttrs (builtins.map (i: {
+  in {
+    # mapped users
+    users.users = builtins.listToAttrs (builtins.map (i: {
         name = i.username;
         value = {
           hashedPassword = "${i.hashedPassword}";
@@ -19,7 +18,7 @@
             "admins"
           ];
 
-          openssh.authorizedKeys.keys = lib.mkIf ((i.githubKeysUrl != "") && (i.sha256 != "")) (
+          openssh.authorizedKeys.keys = lib.optionals ((i.githubKeysUrl != "") && (i.sha256 != "")) [
             lib.strings.splitString
             "\n"
             (
@@ -30,20 +29,10 @@
                 }
               )
             )
-          );
+          ];
         };
       })
       users);
-
-    homeUsers = builtins.listToAttrs (builtins.map (i: {
-        # Import your home-manager configuration
-        name = "${i.username}";
-        value = import ./home.nix upstream i.homeModules i.username;
-      })
-      users);
-  in {
-    # mapped users
-    users.users = nixosUsers;
 
     home-manager = {
       backupFileExtension = "hbak";
@@ -52,7 +41,12 @@
         inherit inputs outputs;
       };
       # mapped home-manager
-      users = homeUsers;
+      users = builtins.listToAttrs (builtins.map (i: {
+          # Import your home-manager configuration
+          name = "${i.username}";
+          value = import ./home.nix upstream i.homeModules i.username;
+        })
+        users);
     };
   };
 in {inherit mkUsers;}
