@@ -1,47 +1,38 @@
 {lib}: let
-  mkUsers = {
-    inputs,
-    outputs,
-    config,
-    pkgs,
-    lib,
-    # user properties
-    username,
-    hashedPassword,
-    description,
-    githubKeysUrl ? "",
-    sha256 ? "",
-    homePath,
-  }: let
-    openssh = lib.mkIf ((githubKeysUrl != "") && (sha256 != "")) (
-      lib.strings.splitString
-      "\n"
-      (
-        builtins.readFile (
-          builtins.fetchurl {
-            url = "${githubKeysUrl}";
-            sha256 = "${sha256}";
-          }
-        )
-      )
-    );
+  mkUsers = users: upstream: let
+    inputs = upstream.inputs;
+    outputs = upstream.outputs;
   in {
-    users.users = {
-      "${username}" = {
-        inherit hashedPassword;
-        isNormalUser = true;
-        description = "${description}";
+    # mapped users
+    users.users = builtins.listToAttrs (builtins.map (i: {
+        name = i.username;
+        value = {
+          hashedPassword = "${i.hashedPassword}";
+          isNormalUser = true;
+          description = "${i.description}";
 
-        extraGroups = [
-          "networkmanager"
-          "wheel"
-          "docker"
-          "admins"
-        ];
+          extraGroups = [
+            "networkmanager"
+            "wheel"
+            "docker"
+            "admins"
+          ];
 
-        openssh.authorizedKeys.keys = openssh;
-      };
-    };
+          openssh.authorizedKeys.keys = lib.optionals ((i.githubKeysUrl != "") && (i.sha256 != "")) [
+            lib.strings.splitString
+            "\n"
+            (
+              builtins.readFile (
+                builtins.fetchurl {
+                  url = "${i.githubKeysUrl}";
+                  sha256 = "${i.sha256}";
+                }
+              )
+            )
+          ];
+        };
+      })
+      users);
 
     home-manager = {
       backupFileExtension = "hbak";
@@ -49,13 +40,13 @@
       extraSpecialArgs = {
         inherit inputs outputs;
       };
-
-      users = {
-        # Import your home-manager configuration
-        "${username}" = import homePath {
-          inherit pkgs inputs config;
-        };
-      };
+      # mapped home-manager
+      users = builtins.listToAttrs (builtins.map (i: {
+          # Import your home-manager configuration
+          name = "${i.username}";
+          value = import ./home.nix upstream i.homeModules i.username;
+        })
+        users);
     };
   };
 in {inherit mkUsers;}
