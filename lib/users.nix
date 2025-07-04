@@ -1,13 +1,10 @@
 {lib}: let
-  mkUsers = {
-    inputs,
-    outputs,
-    lib,
-    config,
-    pkgs,
-    # home-manager users data
-    users,
-  }: let
+  mkUsers = users: upstream: let
+    inputs = upstream.inputs;
+    outputs = upstream.outputs;
+    config = upstream.config;
+    pkgs = upstream.pkgs;
+
     nixosUsers = builtins.listToAttrs (builtins.map (i: {
         name = i.username;
         value = {
@@ -41,9 +38,7 @@
     homeUsers = builtins.listToAttrs (builtins.map (i: {
         # Import your home-manager configuration
         name = "${i.username}";
-        value = import i.homePath {
-          inherit pkgs inputs config lib;
-        };
+        value = import ../templates/home upstream i.homeModules i.username;
       })
       users);
   in {
