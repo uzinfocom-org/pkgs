@@ -34,7 +34,7 @@
     #           /_/
 
     # Main homepage website
-    gate.url = "github:kolyma-labs/gate";
+    gate.url = "github:uzinfocom-org/gate";
   };
 
   outputs = {
